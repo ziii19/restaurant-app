@@ -1,34 +1,88 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:retaurannt_app/models/restaurant_list_result.dart';
+import '../models/restaurant.dart';
+import '../models/restaurant_detail.dart';
+import 'restaurant_exceptions.dart';
 
-class ApiService {
-  static const String baseUrl = 'https://restaurant-api.dicoding.dev';
+class RestaurantRepository {
+  static const _baseUrl = 'https://restaurant-api.dicoding.dev';
 
-  Future<RestaurantListResult?> getListRestaurant() async {
-    var uri = Uri.parse('$baseUrl/list');
+  final http.Client client;
 
+  RestaurantRepository({required this.client});
+
+  Future<List<Restaurant>> fetchRestaurants() async {
     try {
-      final response = await http.get(uri);
+      final response = await client.get(Uri.parse('$_baseUrl/list'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-
-        if (data.isEmpty) {
-          throw Exception('No data available'); // Data kosong
+        if (!data['error']) {
+          List<dynamic> restaurantsJson = data['restaurants'];
+          if (restaurantsJson.isEmpty) {
+            throw DataNotFoundException();
+          }
+          return restaurantsJson
+              .map((json) => Restaurant.fromJson(json))
+              .toList();
+        } else {
+          throw RestaurantException('Failed to load restaurants');
         }
-
-        return RestaurantListResult.fromJson(data);
       } else {
-        throw Exception('Failed to load data'); // Status code bukan 200
+        throw ServerException();
       }
-    } on http.ClientException catch (_) {
-      throw Exception('No internet connection'); // Tidak ada koneksi internet
-    } on FormatException catch (_) {
-      throw Exception('Invalid data format'); // Format data tidak valid
+    } on http.ClientException {
+      throw NoInternetException();
     } catch (e) {
-      throw Exception(
-          'An unexpected error occurred: $e'); // Kesalahan tak terduga
+      throw RestaurantException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<RestaurantDetail> fetchRestaurantDetail(String id) async {
+    try {
+      final response = await client.get(Uri.parse('$_baseUrl/detail/$id'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (!data['error']) {
+          return RestaurantDetail.fromJson(data['restaurant']);
+        } else {
+          throw RestaurantException('Failed to load restaurant detail');
+        }
+      } else {
+        throw ServerException();
+      }
+    } on http.ClientException {
+      throw NoInternetException();
+    } catch (e) {
+      throw RestaurantException('An unexpected error occurred: $e');
+    }
+  }
+
+  Future<List<Restaurant>> searchRestaurants(String query) async {
+    try {
+      final response = await client.get(Uri.parse('$_baseUrl/search?q=$query'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (!data['error']) {
+          List<dynamic> restaurantsJson = data['restaurants'];
+          if (restaurantsJson.isEmpty) {
+            throw DataNotFoundException();
+          }
+          return restaurantsJson
+              .map((json) => Restaurant.fromJson(json))
+              .toList();
+        } else {
+          throw RestaurantException('Failed to search restaurants');
+        }
+      } else {
+        throw ServerException();
+      }
+    } on http.ClientException {
+      throw NoInternetException();
+    } catch (e) {
+      throw RestaurantException('An unexpected error occurred: $e');
     }
   }
 }
