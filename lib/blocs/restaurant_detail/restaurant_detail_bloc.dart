@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../models/restaurant_detail.dart';
-import '../../service/restaurant_exceptions.dart';
+import '../../service/restaurant_exception.dart';
 import '../../service/restaurant_service.dart';
 
 part 'restaurant_detail_event.dart';

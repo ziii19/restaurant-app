@@ -3,7 +3,7 @@ class RestaurantException implements Exception {
   RestaurantException(this.message);
 
   @override
-  String toString() => 'RestaurantException: $message';
+  String toString() => message;
 }
 
 class NoInternetException extends RestaurantException {

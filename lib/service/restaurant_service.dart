@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/restaurant.dart';
 import '../models/restaurant_detail.dart';
-import 'restaurant_exceptions.dart';
+import 'restaurant_exception.dart';
 
 class RestaurantRepository {
   static const _baseUrl = 'https://restaurant-api.dicoding.dev';
@@ -34,7 +34,7 @@ class RestaurantRepository {
     } on http.ClientException {
       throw NoInternetException();
     } catch (e) {
-      throw RestaurantException('An unexpected error occurred: $e');
+      throw RestaurantException(e.toString());
     }
   }
 
@@ -55,7 +55,7 @@ class RestaurantRepository {
     } on http.ClientException {
       throw NoInternetException();
     } catch (e) {
-      throw RestaurantException('An unexpected error occurred: $e');
+      throw RestaurantException(e.toString());
     }
   }
 
@@ -82,7 +82,7 @@ class RestaurantRepository {
     } on http.ClientException {
       throw NoInternetException();
     } catch (e) {
-      throw RestaurantException('An unexpected error occurred: $e');
+      throw RestaurantException(e.toString());
     }
   }
 }

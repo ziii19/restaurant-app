@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/restaurant.dart';
+import '../models/restaurant_detail.dart';
 
 class DetailScreen extends StatelessWidget {
-  final Restaurant restaurant;
+  final RestaurantDetail restaurant;
 
   const DetailScreen({super.key, required this.restaurant});
 
@@ -24,7 +24,7 @@ class DetailScreen extends StatelessWidget {
                       bottomLeft: Radius.circular(24),
                       bottomRight: Radius.circular(24)),
                   child: Image.network(
-                    restaurant.pictureId,
+                    "https://restaurant-api.dicoding.dev/images/large/${restaurant.pictureId}",
                     width: double.infinity,
                     height: 300,
                     fit: BoxFit.cover,
@@ -107,17 +107,84 @@ class DetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _BuildMenu(
-                    restaurant: restaurant.menus['foods']!,
+                    restaurant: restaurant.foods,
                     menu: 'Foods',
                     icon: Icons.food_bank,
                   ),
                   const SizedBox(height: 20),
                   _BuildMenu(
                     menu: 'Drinks',
-                    restaurant: restaurant.menus['drinks']!,
+                    restaurant: restaurant.drinks,
                     icon: Icons.local_bar_rounded,
-                  )
+                  ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                'Customer Reviews',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: restaurant.customerReviews.isNotEmpty
+                    ? restaurant.customerReviews.map((review) {
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade300,
+                                spreadRadius: 1,
+                                blurRadius: 5,
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.person,
+                                      color: Colors.deepOrange, size: 20),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    review.name,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                review.date,
+                                style: TextStyle(color: Colors.grey.shade600),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                review.review,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList()
+                    : [
+                        Text("No reviews available.",
+                            style: TextStyle(
+                                fontSize: 16, color: Colors.grey.shade600))
+                      ],
               ),
             ),
             const SizedBox(height: 20),
@@ -153,14 +220,14 @@ class _BuildMenu extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 250, // Adjust height based on your content
+          height: 250,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: restaurant.length,
             itemBuilder: (context, index) {
               final drink = restaurant[index];
               return Container(
-                width: 180, // Adjust width based on your design
+                width: 180,
                 margin: const EdgeInsets.only(right: 16),
                 child: Card(
                   shape: RoundedRectangleBorder(

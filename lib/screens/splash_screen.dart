@@ -1,47 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:retaurannt_app/service/service.dart';
-import '../models/restaurant.dart';
-import 'home_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/restaurant/restaurant_bloc.dart';
+import 'main_screen.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    void navToHome(RestaurantList restaurantList) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              HomeScreen(restaurants: restaurantList.restaurants),
-        ),
-        (route) => false,
-      );
-    }
-
-    Future.delayed(const Duration(seconds: 3)).then(
-      (value) async {
-        try {
-          RestaurantList restaurantList = await Service.loadRestaurants();
-          if (restaurantList.restaurants.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No restaurants found.')),
-            );
-          } else {
-            navToHome(restaurantList);
-          }
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')),
+    return BlocListener<RestaurantBloc, RestaurantState>(
+      listener: (context, state) {
+        if (state is RestaurantLoaded) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const MainScreen()),
+            (route) => false,
           );
+        } else if (state is RestaurantError) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(state.message)));
+        } else {
+          return;
         }
       },
-    );
-
-    // Show splash screen logo
-    return Scaffold(
-      body: Center(
-        child: Image.asset('assets/logo.png'),
+      child: Scaffold(
+        body: Center(
+          child: Image.asset('assets/logo.png'),
+        ),
       ),
     );
   }
